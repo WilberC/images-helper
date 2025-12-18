@@ -9,6 +9,7 @@ from pathlib import Path
 from src.helpers.resize import resize_image
 from src.helpers.remove_background import remove_background
 from src.helpers.vectorize import vectorize_image
+from src.helpers.auto_crop import auto_crop
 
 
 def main():
@@ -21,6 +22,7 @@ Examples:
   python main.py resize input.jpg output.jpg --width 800 --height 600
   python main.py remove-bg input.png output.png
   python main.py vectorize input.jpg output.svg
+  python main.py auto-crop input.png output.png
   
 Note: Input files are read from files/input/ and output files are saved to files/output/
         """
@@ -49,6 +51,13 @@ Note: Input files are read from files/input/ and output files are saved to files
     vector_parser.add_argument('output', type=str, help='Output SVG filename (to files/output/)')
     vector_parser.add_argument('--colors', type=int, default=8, 
                               help='Number of colors to use (default: 8)')
+    
+    # Auto-crop command
+    crop_parser = subparsers.add_parser('auto-crop', help='Automatically crop blank borders')
+    crop_parser.add_argument('input', type=str, help='Input image filename (from files/input/)')
+    crop_parser.add_argument('output', type=str, help='Output image filename (to files/output/)')
+    crop_parser.add_argument('--threshold', type=int, default=10,
+                            help='Pixel threshold for detecting content (0-255, default: 10)')
     
     args = parser.parse_args()
     
@@ -84,6 +93,10 @@ Note: Input files are read from files/input/ and output files are saved to files
         elif args.command == 'vectorize':
             vectorize_image(str(input_path), str(output_path), colors=args.colors)
             print(f"✓ Image vectorized successfully: {output_path}")
+            
+        elif args.command == 'auto-crop':
+            auto_crop(str(input_path), str(output_path), threshold=args.threshold)
+            print(f"✓ Image cropped successfully: {output_path}")
             
     except Exception as e:
         print(f"Error: {str(e)}", file=sys.stderr)

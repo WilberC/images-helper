@@ -7,6 +7,7 @@ A Python CLI tool for common image processing operations including resizing, bac
 - **Resize**: Resize images to specific dimensions with optional aspect ratio preservation
 - **Remove Background**: Automatically remove backgrounds from images
 - **Vectorize**: Convert raster images to SVG vector format
+- **Auto-Crop**: Automatically detect and remove blank borders from images
 
 ## Installation
 
@@ -44,6 +45,15 @@ python main.py vectorize input.jpg output.svg
 python main.py vectorize input.jpg output.svg --colors 16
 ```
 
+### Auto-Crop Image
+```bash
+# Automatically remove blank borders
+python main.py auto-crop input.png output.png
+
+# Adjust sensitivity (lower = more aggressive cropping)
+python main.py auto-crop input.png output.png --threshold 5
+```
+
 ## Project Structure
 
 ```
@@ -55,7 +65,8 @@ images-helper/
 │       ├── __init__.py
 │       ├── resize.py
 │       ├── remove_background.py
-│       └── vectorize.py
+│       ├── vectorize.py
+│       └── auto_crop.py
 ├── requirements.txt
 └── README.md
 ```
