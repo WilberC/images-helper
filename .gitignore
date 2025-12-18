@@ -71,4 +71,5 @@ examples/output/*
 !examples/output/.gitkeep
 !**/.gitkeep
 
-files/*.png
+files/input/*.png
+files/output/*.png
