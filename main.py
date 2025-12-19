@@ -10,6 +10,7 @@ from src.helpers.resize import resize_image
 from src.helpers.remove_background import remove_background
 from src.helpers.vectorize import vectorize_image
 from src.helpers.auto_crop import auto_crop
+from src.helpers.favicon import generate_favicon
 
 
 def main():
@@ -23,6 +24,7 @@ Examples:
   python main.py remove-bg input.png output.png
   python main.py vectorize input.jpg output.svg
   python main.py auto-crop input.png output.png
+  python main.py favicon input.png favicon.ico
   
 Note: Input files are read from files/input/ and output files are saved to files/output/
         """
@@ -58,6 +60,13 @@ Note: Input files are read from files/input/ and output files are saved to files
     crop_parser.add_argument('output', type=str, help='Output image filename (to files/output/)')
     crop_parser.add_argument('--threshold', type=int, default=10,
                             help='Pixel threshold for detecting content (0-255, default: 10)')
+    
+    # Favicon command
+    favicon_parser = subparsers.add_parser('favicon', help='Generate favicon (.ico) with multiple sizes')
+    favicon_parser.add_argument('input', type=str, help='Input image filename (from files/input/)')
+    favicon_parser.add_argument('output', type=str, help='Output favicon filename (to files/output/)')
+    favicon_parser.add_argument('--sizes', type=int, nargs='+', default=[16, 32, 48],
+                               help='Icon sizes to include (default: 16 32 48). Common: 16 32 48 64 128 256')
     
     args = parser.parse_args()
     
@@ -97,6 +106,11 @@ Note: Input files are read from files/input/ and output files are saved to files
         elif args.command == 'auto-crop':
             auto_crop(str(input_path), str(output_path), threshold=args.threshold)
             print(f"✓ Image cropped successfully: {output_path}")
+            
+        elif args.command == 'favicon':
+            generate_favicon(str(input_path), str(output_path), sizes=args.sizes)
+            print(f"✓ Favicon generated successfully: {output_path}")
+            print(f"  Sizes included: {', '.join(f'{s}x{s}' for s in sorted(args.sizes))}")
             
     except Exception as e:
         print(f"Error: {str(e)}", file=sys.stderr)

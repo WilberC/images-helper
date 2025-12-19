@@ -8,6 +8,7 @@ A Python CLI tool for common image processing operations including resizing, bac
 - **Remove Background**: Automatically remove backgrounds from images
 - **Vectorize**: Convert raster images to SVG vector format
 - **Auto-Crop**: Automatically detect and remove blank borders from images
+- **Favicon**: Generate multi-size favicon (.ico) files for websites
 
 ## Installation
 
@@ -54,6 +55,18 @@ python main.py auto-crop input.png output.png
 python main.py auto-crop input.png output.png --threshold 5
 ```
 
+### Generate Favicon
+```bash
+# Generate favicon with default sizes (16x16, 32x32, 48x48)
+python main.py favicon logo.png favicon.ico
+
+# Generate favicon with custom sizes
+python main.py favicon logo.png favicon.ico --sizes 16 32 48 64 128 256
+
+# Generate high-quality favicon for modern browsers
+python main.py favicon logo.png favicon.ico --sizes 32 64 128
+```
+
 ## Project Structure
 
 ```
@@ -66,7 +79,8 @@ images-helper/
 │       ├── resize.py
 │       ├── remove_background.py
 │       ├── vectorize.py
-│       └── auto_crop.py
+│       ├── auto_crop.py
+│       └── favicon.py
 ├── requirements.txt
 └── README.md
 ```
