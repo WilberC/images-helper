@@ -11,6 +11,7 @@ from src.helpers.remove_background import remove_background
 from src.helpers.vectorize import vectorize_image
 from src.helpers.auto_crop import auto_crop
 from src.helpers.favicon import generate_favicon
+from src.helpers.remove_watermark import remove_watermark
 
 
 def main():
@@ -25,6 +26,7 @@ Examples:
   python main.py vectorize input.jpg output.svg
   python main.py auto-crop input.png output.png
   python main.py favicon input.png favicon.ico
+  python main.py remove-watermark-v1 input.jpg output.jpg
   
 Note: Input files are read from files/input/ and output files are saved to files/output/
         """
@@ -67,6 +69,17 @@ Note: Input files are read from files/input/ and output files are saved to files
     favicon_parser.add_argument('output', type=str, help='Output favicon filename (to files/output/)')
     favicon_parser.add_argument('--sizes', type=int, nargs='+', default=[16, 32, 48],
                                help='Icon sizes to include (default: 16 32 48). Common: 16 32 48 64 128 256')
+    
+    # Remove watermark command
+    watermark_parser = subparsers.add_parser('remove-watermark-v1', help='Remove watermark from bottom-right corner')
+    watermark_parser.add_argument('input', type=str, help='Input image filename (from files/input/)')
+    watermark_parser.add_argument('output', type=str, help='Output image filename (to files/output/)')
+    watermark_parser.add_argument('--width', type=int, default=30,
+                                 help='Watermark width as percentage of image width (default: 30)')
+    watermark_parser.add_argument('--height', type=int, default=15,
+                                 help='Watermark height as percentage of image height (default: 15)')
+    watermark_parser.add_argument('--method', type=str, choices=['telea', 'ns'], default='telea',
+                                 help='Inpainting method: telea (fast) or ns (higher quality, default: telea)')
     
     args = parser.parse_args()
     
@@ -111,6 +124,18 @@ Note: Input files are read from files/input/ and output files are saved to files
             generate_favicon(str(input_path), str(output_path), sizes=args.sizes)
             print(f"✓ Favicon generated successfully: {output_path}")
             print(f"  Sizes included: {', '.join(f'{s}x{s}' for s in sorted(args.sizes))}")
+            
+        elif args.command == 'remove-watermark-v1':
+            remove_watermark(
+                str(input_path),
+                str(output_path),
+                width_percent=args.width,
+                height_percent=args.height,
+                method=args.method
+            )
+            print(f"✓ Watermark removed successfully: {output_path}")
+            print(f"  Region: {args.width}% width × {args.height}% height (bottom-right)")
+            print(f"  Method: {args.method}")
             
     except Exception as e:
         print(f"Error: {str(e)}", file=sys.stderr)

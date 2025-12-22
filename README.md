@@ -9,6 +9,8 @@ A Python CLI tool for common image processing operations including resizing, bac
 - **Vectorize**: Convert raster images to SVG vector format
 - **Auto-Crop**: Automatically detect and remove blank borders from images
 - **Favicon**: Generate multi-size favicon (.ico) files for websites
+- **Remove Watermark**: Remove watermarks from the bottom-right corner using content-aware inpainting
+
 
 ## Installation
 
@@ -67,6 +69,22 @@ python main.py favicon logo.png favicon.ico --sizes 16 32 48 64 128 256
 python main.py favicon logo.png favicon.ico --sizes 32 64 128
 ```
 
+### Remove Watermark
+```bash
+# Remove watermark from bottom-right corner (default: 30% width × 15% height)
+python main.py remove-watermark-v1 input.jpg output.jpg
+
+# Adjust watermark region size
+python main.py remove-watermark-v1 input.jpg output.jpg --width 40 --height 20
+
+# Use higher quality inpainting method (slower but better results)
+python main.py remove-watermark-v1 input.jpg output.jpg --method ns
+
+# Fine-tune for small watermarks
+python main.py remove-watermark-v1 input.jpg output.jpg --width 25 --height 10 --method ns
+```
+
+
 ## Project Structure
 
 ```
@@ -80,7 +98,8 @@ images-helper/
 │       ├── remove_background.py
 │       ├── vectorize.py
 │       ├── auto_crop.py
-│       └── favicon.py
+│       ├── favicon.py
+│       └── remove_watermark.py
 ├── requirements.txt
 └── README.md
 ```
