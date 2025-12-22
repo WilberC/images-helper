@@ -93,20 +93,47 @@ Options:
 - `--method`: Inpainting method - `telea` (fast) or `ns` (Navier-Stokes, higher quality)
 
 #### Version 2 (LaMa AI Model) - **Recommended**
-Advanced watermark removal using the LaMa (Large Mask Inpainting) AI model for superior results:
+Advanced watermark removal using the LaMa (Large Mask Inpainting) AI model for superior results.
+
+> **Note:** This implementation is based on the logic from [dinoBOLT/Gemini-Watermark-Remover](https://github.com/dinoBOLT/Gemini-Watermark-Remover), adapted and transformed to Python.
+
+**Setup Instructions:**
+
+1. **Download the model (`lama_fp32.onnx`):**
+   
+   👉 [Click here to download from Google Drive](https://drive.google.com/file/d/16cRZWEQyJFecg77ebUBXjFxAik0iFU_C/view?usp=sharing)
+
+2. **Place the file:**
+   
+   Move the downloaded `lama_fp32.onnx` file into the `assets/` folder inside the project directory.
+   
+   Your folder structure must look like this:
+   
+   ```
+   images-helper/
+   ├── assets/
+   │   └── lama_fp32.onnx  <-- The file goes here (approx. 200MB)
+   ├── src/
+   │   └── helpers/
+   │       └── ...
+   ├── main.py
+   └── ...
+   ```
+
+**Usage:**
 
 ```bash
 python main.py remove-watermark-v2 input.jpg output.jpg
 python main.py remove-watermark-v2 input.jpg output.jpg --model path/to/custom/model.onnx
 ```
 
-Features:
+**Features:**
 - Uses state-of-the-art AI inpainting model (LaMa)
 - Automatically detects and removes watermarks from bottom-right corner (15% × 15%)
 - Preserves original image quality outside the watermark region
 - Requires `lama_fp32.onnx` model in `assets/` directory
 
-Options:
+**Options:**
 - `--model`: Custom path to lama_fp32.onnx model (default: assets/lama_fp32.onnx)
 
 ## Project Structure
