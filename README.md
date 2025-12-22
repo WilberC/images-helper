@@ -2,6 +2,14 @@
 
 A Python CLI tool for common image processing operations including resizing, background removal, and vectorization.
 
+## Dependencies
+
+- **Pillow**: Image manipulation
+- **rembg**: Background removal
+- **opencv-python**: Image processing and inpainting
+- **numpy**: Numerical operations
+- **onnxruntime**: AI model inference for advanced watermark removal
+
 ## Features
 
 - **Resize**: Resize images to specific dimensions with optional aspect ratio preservation
@@ -69,21 +77,37 @@ python main.py favicon logo.png favicon.ico --sizes 16 32 48 64 128 256
 python main.py favicon logo.png favicon.ico --sizes 32 64 128
 ```
 
-### Remove Watermark
+### 6. Remove Watermark
+
+#### Version 1 (OpenCV Inpainting)
+Remove watermarks from the bottom-right corner of images using OpenCV's content-aware inpainting:
+
 ```bash
-# Remove watermark from bottom-right corner (default: 30% width × 15% height)
 python main.py remove-watermark-v1 input.jpg output.jpg
-
-# Adjust watermark region size
-python main.py remove-watermark-v1 input.jpg output.jpg --width 40 --height 20
-
-# Use higher quality inpainting method (slower but better results)
-python main.py remove-watermark-v1 input.jpg output.jpg --method ns
-
-# Fine-tune for small watermarks
-python main.py remove-watermark-v1 input.jpg output.jpg --width 25 --height 10 --method ns
+python main.py remove-watermark-v1 input.jpg output.jpg --width 25 --height 20 --method ns
 ```
 
+Options:
+- `--width`: Watermark width as percentage of image width (default: 30)
+- `--height`: Watermark height as percentage of image height (default: 15)
+- `--method`: Inpainting method - `telea` (fast) or `ns` (Navier-Stokes, higher quality)
+
+#### Version 2 (LaMa AI Model) - **Recommended**
+Advanced watermark removal using the LaMa (Large Mask Inpainting) AI model for superior results:
+
+```bash
+python main.py remove-watermark-v2 input.jpg output.jpg
+python main.py remove-watermark-v2 input.jpg output.jpg --model path/to/custom/model.onnx
+```
+
+Features:
+- Uses state-of-the-art AI inpainting model (LaMa)
+- Automatically detects and removes watermarks from bottom-right corner (15% × 15%)
+- Preserves original image quality outside the watermark region
+- Requires `lama_fp32.onnx` model in `assets/` directory
+
+Options:
+- `--model`: Custom path to lama_fp32.onnx model (default: assets/lama_fp32.onnx)
 
 ## Project Structure
 

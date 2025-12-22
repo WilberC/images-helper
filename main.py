@@ -12,6 +12,7 @@ from src.helpers.vectorize import vectorize_image
 from src.helpers.auto_crop import auto_crop
 from src.helpers.favicon import generate_favicon
 from src.helpers.remove_watermark import remove_watermark
+from src.helpers.remove_watermark_v2 import remove_watermark_v2
 
 
 def main():
@@ -27,6 +28,7 @@ Examples:
   python main.py auto-crop input.png output.png
   python main.py favicon input.png favicon.ico
   python main.py remove-watermark-v1 input.jpg output.jpg
+  python main.py remove-watermark-v2 input.jpg output.jpg
   
 Note: Input files are read from files/input/ and output files are saved to files/output/
         """
@@ -70,8 +72,8 @@ Note: Input files are read from files/input/ and output files are saved to files
     favicon_parser.add_argument('--sizes', type=int, nargs='+', default=[16, 32, 48],
                                help='Icon sizes to include (default: 16 32 48). Common: 16 32 48 64 128 256')
     
-    # Remove watermark command
-    watermark_parser = subparsers.add_parser('remove-watermark-v1', help='Remove watermark from bottom-right corner')
+    # Remove watermark v1 command (OpenCV inpainting)
+    watermark_parser = subparsers.add_parser('remove-watermark-v1', help='Remove watermark from bottom-right corner (OpenCV)')
     watermark_parser.add_argument('input', type=str, help='Input image filename (from files/input/)')
     watermark_parser.add_argument('output', type=str, help='Output image filename (to files/output/)')
     watermark_parser.add_argument('--width', type=int, default=30,
@@ -80,6 +82,13 @@ Note: Input files are read from files/input/ and output files are saved to files
                                  help='Watermark height as percentage of image height (default: 15)')
     watermark_parser.add_argument('--method', type=str, choices=['telea', 'ns'], default='telea',
                                  help='Inpainting method: telea (fast) or ns (higher quality, default: telea)')
+    
+    # Remove watermark v2 command (LaMa AI model)
+    watermark_v2_parser = subparsers.add_parser('remove-watermark-v2', help='Remove watermark using LaMa AI model (advanced)')
+    watermark_v2_parser.add_argument('input', type=str, help='Input image filename (from files/input/)')
+    watermark_v2_parser.add_argument('output', type=str, help='Output image filename (to files/output/)')
+    watermark_v2_parser.add_argument('--model', type=str, default=None,
+                                    help='Path to lama_fp32.onnx model (default: assets/lama_fp32.onnx)')
     
     args = parser.parse_args()
     
@@ -136,6 +145,16 @@ Note: Input files are read from files/input/ and output files are saved to files
             print(f"✓ Watermark removed successfully: {output_path}")
             print(f"  Region: {args.width}% width × {args.height}% height (bottom-right)")
             print(f"  Method: {args.method}")
+            
+        elif args.command == 'remove-watermark-v2':
+            remove_watermark_v2(
+                str(input_path),
+                str(output_path),
+                model_path=args.model
+            )
+            print(f"✓ Watermark removed successfully using LaMa AI: {output_path}")
+            print(f"  Model: LaMa (Large Mask Inpainting)")
+            print(f"  Region: 15% width × 15% height (bottom-right)")
             
     except Exception as e:
         print(f"Error: {str(e)}", file=sys.stderr)
