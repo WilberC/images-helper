@@ -5,6 +5,7 @@ Watermark removal using content-aware inpainting
 import cv2
 import numpy as np
 from PIL import Image
+from src.utils import Spinner
 
 
 def remove_watermark(
@@ -35,45 +36,46 @@ def remove_watermark(
     if method not in ['telea', 'ns']:
         raise ValueError("Method must be 'telea' or 'ns'")
     
-    # Read image using OpenCV
-    img = cv2.imread(input_path)
-    if img is None:
-        raise FileNotFoundError(f"Could not read image: {input_path}")
-    
-    # Get image dimensions
-    height, width = img.shape[:2]
-    
-    # Calculate watermark region (bottom-right corner)
-    watermark_width = int(width * (width_percent / 100))
-    watermark_height = int(height * (height_percent / 100))
-    
-    # Create mask (white = area to inpaint, black = area to keep)
-    mask = np.zeros((height, width), dtype=np.uint8)
-    
-    # Define the watermark region in bottom-right corner
-    x_start = width - watermark_width
-    y_start = height - watermark_height
-    
-    # Mark the watermark region in the mask
-    mask[y_start:height, x_start:width] = 255
-    
-    # Choose inpainting algorithm
-    if method == 'telea':
-        inpaint_method = cv2.INPAINT_TELEA
-    else:  # ns
-        inpaint_method = cv2.INPAINT_NS
-    
-    # Perform inpainting
-    # Radius determines how far the algorithm looks for reference pixels
-    inpaint_radius = 3
-    result = cv2.inpaint(img, mask, inpaint_radius, inpaint_method)
-    
-    # Convert BGR to RGB for PIL
-    result_rgb = cv2.cvtColor(result, cv2.COLOR_BGR2RGB)
-    
-    # Save using PIL to maintain format compatibility
-    output_img = Image.fromarray(result_rgb)
-    output_img.save(output_path)
+    with Spinner("Removing watermark with inpainting..."):
+        # Read image using OpenCV
+        img = cv2.imread(input_path)
+        if img is None:
+            raise FileNotFoundError(f"Could not read image: {input_path}")
+        
+        # Get image dimensions
+        height, width = img.shape[:2]
+        
+        # Calculate watermark region (bottom-right corner)
+        watermark_width = int(width * (width_percent / 100))
+        watermark_height = int(height * (height_percent / 100))
+        
+        # Create mask (white = area to inpaint, black = area to keep)
+        mask = np.zeros((height, width), dtype=np.uint8)
+        
+        # Define the watermark region in bottom-right corner
+        x_start = width - watermark_width
+        y_start = height - watermark_height
+        
+        # Mark the watermark region in the mask
+        mask[y_start:height, x_start:width] = 255
+        
+        # Choose inpainting algorithm
+        if method == 'telea':
+            inpaint_method = cv2.INPAINT_TELEA
+        else:  # ns
+            inpaint_method = cv2.INPAINT_NS
+        
+        # Perform inpainting
+        # Radius determines how far the algorithm looks for reference pixels
+        inpaint_radius = 3
+        result = cv2.inpaint(img, mask, inpaint_radius, inpaint_method)
+        
+        # Convert BGR to RGB for PIL
+        result_rgb = cv2.cvtColor(result, cv2.COLOR_BGR2RGB)
+        
+        # Save using PIL to maintain format compatibility
+        output_img = Image.fromarray(result_rgb)
+        output_img.save(output_path)
 
 
 def remove_watermark_custom_region(

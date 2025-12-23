@@ -2,6 +2,7 @@
 from pathlib import Path
 from PIL import Image, ImageChops
 import numpy as np
+from src.utils import Spinner
 
 
 def auto_crop(input_path: str, output_path: str, threshold: int = 10) -> None:
@@ -25,31 +26,32 @@ def auto_crop(input_path: str, output_path: str, threshold: int = 10) -> None:
     if not 0 <= threshold <= 255:
         raise ValueError("Threshold must be between 0 and 255")
     
-    # Open image
-    img = Image.open(input_path)
-    
-    # Handle different image modes
-    if img.mode == 'RGBA':
-        # For images with transparency, use alpha channel
-        bbox = _get_bbox_with_alpha(img, threshold)
-    else:
-        # For RGB/L images, detect based on color difference from background
-        bbox = _get_bbox_without_alpha(img, threshold)
-    
-    if bbox is None:
-        # Image is completely blank, save as is
-        print("Warning: Image appears to be completely blank")
-        img.save(output_path)
-        return
-    
-    # Crop to bounding box
-    cropped = img.crop(bbox)
-    
-    # Ensure output directory exists
-    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
-    
-    # Save cropped image
-    cropped.save(output_path)
+    with Spinner("Analyzing and cropping image..."):
+        # Open image
+        img = Image.open(input_path)
+        
+        # Handle different image modes
+        if img.mode == 'RGBA':
+            # For images with transparency, use alpha channel
+            bbox = _get_bbox_with_alpha(img, threshold)
+        else:
+            # For RGB/L images, detect based on color difference from background
+            bbox = _get_bbox_without_alpha(img, threshold)
+        
+        if bbox is None:
+            # Image is completely blank, save as is
+            print("Warning: Image appears to be completely blank")
+            img.save(output_path)
+            return
+        
+        # Crop to bounding box
+        cropped = img.crop(bbox)
+        
+        # Ensure output directory exists
+        Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+        
+        # Save cropped image
+        cropped.save(output_path)
 
 
 def _get_bbox_with_alpha(img: Image.Image, threshold: int) -> tuple:

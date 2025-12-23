@@ -9,6 +9,7 @@ from PIL import Image
 import onnxruntime as ort
 from pathlib import Path
 from typing import Tuple, Optional
+from src.utils import Spinner
 
 
 class LamaWatermarkRemover:
@@ -25,15 +26,19 @@ class LamaWatermarkRemover:
     WATERMARK_WIDTH_RATIO = 0.15   # 15% from right
     EXTENDED_RATIO = 0.16          # Extended region for better blending
     
-    def __init__(self, model_path: str):
+    def __init__(self, model_path: str, spinner: Optional[Spinner] = None):
         """
         Initialize the LaMa watermark remover
         
         Args:
             model_path: Path to the lama_fp32.onnx model file
+            spinner: Optional Spinner instance for progress updates
         """
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"Model file not found: {model_path}")
+        
+        if spinner:
+            spinner.update_message("Loading AI model...")
         
         # Initialize ONNX Runtime session
         self.session = ort.InferenceSession(
@@ -208,7 +213,8 @@ class LamaWatermarkRemover:
     def remove_watermark(
         self,
         input_path: str,
-        output_path: str
+        output_path: str,
+        spinner: Optional[Spinner] = None
     ) -> None:
         """
         Remove watermark from image using LaMa model
@@ -216,7 +222,11 @@ class LamaWatermarkRemover:
         Args:
             input_path: Path to input image
             output_path: Path to save processed image
+            spinner: Optional Spinner instance for progress updates
         """
+        if spinner:
+            spinner.update_message("Preprocessing image...")
+        
         # Load original image
         original_image = Image.open(input_path)
         
@@ -229,9 +239,15 @@ class LamaWatermarkRemover:
             self.input_names[1]: mask_tensor
         }
         
+        if spinner:
+            spinner.update_message("Running AI inference...")
+        
         # Run inference
         outputs = self.session.run([self.output_name], inputs)
         output_tensor = outputs[0]
+        
+        if spinner:
+            spinner.update_message("Composing final image...")
         
         # Postprocess
         processed_array = self.postprocess_output(output_tensor)
@@ -263,16 +279,17 @@ def remove_watermark_v2(
     Raises:
         FileNotFoundError: If input file or model file doesn't exist
     """
-    # Default model path
-    if model_path is None:
-        # Assume model is in assets/lama_fp32.onnx relative to project root
-        project_root = Path(__file__).parent.parent.parent
-        model_path = str(project_root / 'assets' / 'lama_fp32.onnx')
-    
-    # Validate input file
-    if not os.path.exists(input_path):
-        raise FileNotFoundError(f"Input file not found: {input_path}")
-    
-    # Create remover and process
-    remover = LamaWatermarkRemover(model_path)
-    remover.remove_watermark(input_path, output_path)
+    with Spinner("Initializing LaMa AI model...") as spinner:
+        # Default model path
+        if model_path is None:
+            # Assume model is in assets/lama_fp32.onnx relative to project root
+            project_root = Path(__file__).parent.parent.parent
+            model_path = str(project_root / 'assets' / 'lama_fp32.onnx')
+        
+        # Validate input file
+        if not os.path.exists(input_path):
+            raise FileNotFoundError(f"Input file not found: {input_path}")
+        
+        # Create remover and process
+        remover = LamaWatermarkRemover(model_path, spinner)
+        remover.remove_watermark(input_path, output_path, spinner)
